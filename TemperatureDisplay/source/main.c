@@ -62,25 +62,42 @@ void do_asciiart()
 	while (*p)
 		console_putch(*p++);
 }
+
+
+void dumpana() {
+	int i;
+	for (i = 0; i < 0x100; ++i)
+	{
+		uint32_t v;
+		xenon_smc_ana_read(i, &v);
+		printf("0x%08x, ", (unsigned int)v);
+		if ((i&0x7)==0x7)
+			printf(" // %02x\n", (unsigned int)(i &~0x7));
+	}
+}
+
 /**
  * Displays Fuse Data From Console ! Waring DO NOT WRITE ANYTHNG TO THIS MEMORY LOCATION!
  * U WILL BRICK CPU
  */
 
-/*void getFuseData(){
+void getFuseData(){
 
-   char FUSES [256];
+   char FUSES [350];
 	printf(" * FUSES - write them down and keep them safe:)\n");
 	char *fusestr = FUSES;
-	for (int i=0; i<12; ++i){
+	for (int i=0; i<11; i++){
 		u64 line;
 		unsigned int hi,lo;
 
 		line=xenon_secotp_read_line(i);
 		hi=line>>32;
 		lo=line&0xffffffff;
+      fusestr += sprintf(fusestr, "fuseset %02d: %08x%08x\n", i, hi, lo);
       printf(FUSES);
-}*/
+      
+   }
+}
 
 /**
  * Main function initss and sets up xbox control
@@ -106,7 +123,7 @@ int main()
    do_asciiart();
 
    printf("\n");
-   printf(" press a to See temp\n");
+   printf("press a to See temp\n");
    printf("press b to Get FUSE DATA!\n");
    printf(" press x to close program\n");
    printf(" press y to run Somthing!\n");
@@ -141,7 +158,7 @@ int main()
             xenon_smc_power_reboot();
  			} else if ((c.b)&&(!oldc.b)){
              printf("HERE IS FUSE DATA!\n");
-             //getFuseData();
+             getFuseData();
              
           } else if ((c.y) &&(!oldc.y)){
              printf("Changing color of screen");
