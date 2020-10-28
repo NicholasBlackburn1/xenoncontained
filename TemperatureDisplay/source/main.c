@@ -27,13 +27,11 @@ xenon_smc_send_message(msg);
 }
 
 int main(){
-
-	printf("Xenos/console init! By nicholas Blackburn");
 	mainInit();
 
 	uint8_t buf[16];
 	float CPU_TMP = 0, GPU_TMP = 0, MEM_TMP = 0, MOBO_TMP = 0;
-   
+   printf()
    while(1)
    {
       memset(buf, 0, 16);
