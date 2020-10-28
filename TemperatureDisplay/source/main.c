@@ -63,24 +63,20 @@ void do_asciiart()
 		console_putch(*p++);
 }
 /**
- * Main function initss and sets up xbox control
+ * Simply Allows me to change Color of Console by Rerunning it 
  */
 
-int main()
-{
-   
-
-   // Over Drives Xbox 
-	xenon_make_it_faster(XENON_SPEED_FULL);
+void reRun(){
+   xenon_make_it_faster(XENON_SPEED_FULL);
 
    xenos_init(VIDEO_MODE_AUTO);
    console_init();
 
    kmem_init();
    usb_init();
+
    usb_do_poll();
 
-   console_set_colors(CONSOLE_COLOR_BLACK,CONSOLE_COLOR_GREEN);
    do_asciiart();
 
    printf("\n");
@@ -115,7 +111,115 @@ int main()
  			{
  				printf("exiting..");
             exit(1);
+ 			} else if ((c.b)&&(!oldc.b)){
+             
+          } else if ((c.y &&(!oldc.y))){
+             printf("Changing color of screen");
+             console_set_colors(CONSOLE_COLOR_BLACK,CONSOLE_COLOR_PINK);
+             reRun();
+          }
+          
+          
+ 			oldc=c;
+ 		}
+ 		usb_do_poll();
+
+   }
+
+   return 0;
+}
+
+/**
+ * Displays Fuse Data From Console ! Waring DO NOT WRITE ANYTHNG TO THIS MEMORY LOCATION!
+ * U WILL BRICK CPU
+ */
+
+/*void getFuseData(){
+
+   char FUSES [256];
+	printf(" * FUSES - write them down and keep them safe:)\n");
+	char *fusestr = FUSES;
+	for (int i=0; i<12; ++i){
+		u64 line;
+		unsigned int hi,lo;
+
+		line=xenon_secotp_read_line(i);
+		hi=line>>32;
+		lo=line&0xffffffff;
+      printf(FUSES);
+}*/
+
+/**
+ * Main function initss and sets up xbox control
+ */
+
+int main()
+{
+   
+
+   // Over Drives Xbox 
+	xenon_make_it_faster(XENON_SPEED_FULL);
+
+   xenos_init(VIDEO_MODE_AUTO);
+   console_init();
+
+   kmem_init();
+   usb_init();
+   
+   usb_do_poll();
+   xenon_sound_init();
+
+   console_set_colors(CONSOLE_COLOR_BLACK,CONSOLE_COLOR_GREEN);
+   do_asciiart();
+
+   printf("\n");
+   printf(" press a to See temp\n");
+   printf("press b to Get FUSE DATA!\n");
+   printf(" press x to close program\n");
+   printf(" press y to run Somthing!");
+
+   uint8_t buf[16];
+   float CPU_TMP = 0, GPU_TMP = 0, MEM_TMP = 0, MOBO_TMP = 0;
+   struct controller_data_s oldc;
+   while (1)
+   {
+      /* gets the Temp Sensor Data via buffer*/
+      memset(buf, 0, 16);
+      buf[0] = 0x07;
+      
+      xenon_smc_send_message(buf);
+      xenon_smc_receive_response(buf);
+      
+
+      struct controller_data_s c;
+ 		if (get_controller_data(&c, 0))
+ 		{
+ 
+ 			if((c.a)&&(!oldc.a))
+ 			{
+            printf("Got Temp fof system!\n");
+            getTemp(buf,CPU_TMP,GPU_TMP,MEM_TMP,MOBO_TMP);
+            
  			}
+ 		
+         else if((c.x)&&(!oldc.x))
+ 			{
+ 				printf("exiting..");
+            xenon_smc_power_reboot();
+ 			} else if ((c.b)&&(!oldc.b)){
+             printf("HERE IS FUSE DATA!\n");
+             //getFuseData();
+             
+          } else if ((c.y) &&(!oldc.y)){
+             printf("Changing color of screen");
+              console_set_colors(CONSOLE_COLOR_BLACK,CONSOLE_COLOR_RED);
+              reRun();
+          } else if((c.rb) &&(!oldc.rb)){
+             printf("Data From Cpu and DVD KEY Registers!\n");
+             
+          }
+          
+          
  			oldc=c;
  		}
  		usb_do_poll();
@@ -144,37 +248,45 @@ void getTemp(uint8_t buf[16],float CPU_TMP, float GPU_TMP, float MEM_TMP, float 
       MEM_TMP = (float)((buf[2 * 2 + 1] | (buf[2 * 2 + 2] << 8)) / 256.0);
       MOBO_TMP = (float)((buf[3 * 2 + 1] | (buf[3 * 2 + 2] << 8)) / 256.0);
       
-      if(CPU_TMP > 46.00){
+      if(CPU_TMP > 44.00){
          console_set_colors(CONSOLE_COLOR_BLACK,CONSOLE_COLOR_GREEN);
          printf("CPU = %4.2f \n", CPU_TMP);
          printf("GPU = %4.2f C \n", GPU_TMP); 
          printf("MEM = %4.2f C \n", MEM_TMP); 
          printf("Mobo = %4.2f C \n", MOBO_TMP);
          printf("\r");
+         xenon_set_cpu_fan_speed(50);
 
-      }else if (CPU_TMP > 48.20){
+      }else if (CPU_TMP > 45.000){
           console_set_colors(CONSOLE_COLOR_BLACK,CONSOLE_COLOR_YELLOW);
          printf("CPU = %4.2f \n", CPU_TMP);
          printf("GPU = %4.2f C \n", GPU_TMP); 
          printf("MEM = %4.2f C \n", MEM_TMP); 
          printf("Mobo = %4.2f C \n", MOBO_TMP);
          printf("\r");
+         printf("TURNING ON FANS!\n");
+         xenon_set_cpu_fan_speed(70);
 
-      }else if (CPU_TMP > 49.20){
+      }else if (CPU_TMP > 46.000){
          console_set_colors(CONSOLE_COLOR_BLACK,CONSOLE_COLOR_ORANGE);
          printf("CPU = %4.2f \n", CPU_TMP);
          printf("GPU = %4.2f C \n", GPU_TMP); 
          printf("MEM = %4.2f C \n", MEM_TMP); 
          printf("Mobo = %4.2f C \n", MOBO_TMP);
          printf("\r");
+         printf("TURNING ON FANS!\n");
+         xenon_set_cpu_fan_speed(90);
 
-      }else if (CPU_TMP > 50.20){
+      }else if (CPU_TMP > 50.2000){
          console_set_colors(CONSOLE_COLOR_BLACK,CONSOLE_COLOR_RED);
          printf("CPU = %4.2f \n", CPU_TMP);
          printf("GPU = %4.2f C \n", GPU_TMP); 
          printf("MEM = %4.2f C \n", MEM_TMP); 
          printf("Mobo = %4.2f C \n", MOBO_TMP);
          printf("\r");
+         xenon_set_cpu_fan_speed(100);
+
+         printf("TURNING ON FANS!\n");
 
       }
       
