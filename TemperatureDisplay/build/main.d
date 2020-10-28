@@ -25,7 +25,8 @@ main.o: /mnt/share/TemperatureDisplay/source/main.c \
  /usr/local/xenon/usr/include/xenon_smc/xenon_gpio.h \
  /usr/local/xenon/usr/include/xb360/xb360.h \
  /usr/local/xenon/usr/include/diskio/ata.h \
- /usr/local/xenon/usr/include/diskio/disc_io.h
+ /usr/local/xenon/usr/include/diskio/disc_io.h \
+ /mnt/share/TemperatureDisplay/source/asciiart.h
 
 /usr/local/xenon/usr/include/console/console.h:
 
@@ -80,3 +81,5 @@ main.o: /mnt/share/TemperatureDisplay/source/main.c \
 /usr/local/xenon/usr/include/diskio/ata.h:
 
 /usr/local/xenon/usr/include/diskio/disc_io.h:
+
+/mnt/share/TemperatureDisplay/source/asciiart.h:

@@ -32,7 +32,7 @@
 #include <xenon_smc/xenon_gpio.h>
 #include <xb360/xb360.h>
 #include <diskio/ata.h>
-
+#include "asciiart.h"
 
 /**
  * Controls cpu fan speed
@@ -56,6 +56,12 @@ void xenon_set_gpu_fan_speed(unsigned val)
    xenon_smc_send_message(msg);
 }
 
+void do_asciiart()
+{
+	char *p = asciiart;
+	while (*p)
+		console_putch(*p++);
+}
 /**
  * Main function initss and sets up xbox control
  */
@@ -75,12 +81,11 @@ int main()
    usb_do_poll();
 
    console_set_colors(CONSOLE_COLOR_BLACK,CONSOLE_COLOR_GREEN);
-   
-   printf("============================================================\n");
-   printf("==            Nick Blackburns Temp Tester                 ==\n");
-   printf("============================================================\n");
+   do_asciiart();
+
    printf("\n");
    printf(" press a to See temp\n");
+   printf("press b to Hear something\n");
    printf(" press x to close program\n");
 
    uint8_t buf[16];
@@ -106,7 +111,7 @@ int main()
             printf("a pressed\n");
  			}
  		
-         else if((c.x)&&(oldc.x))
+         else if((c.x)&&(!oldc.x))
  			{
  				printf("exiting..");
             exit(1);
@@ -139,6 +144,43 @@ void getTemp(uint8_t buf[16],float CPU_TMP, float GPU_TMP, float MEM_TMP, float 
       MEM_TMP = (float)((buf[2 * 2 + 1] | (buf[2 * 2 + 2] << 8)) / 256.0);
       MOBO_TMP = (float)((buf[3 * 2 + 1] | (buf[3 * 2 + 2] << 8)) / 256.0);
       
-      printf("CPU = %4.2f C GPU = %4.2f C MEM = %4.2f C Mobo = %4.2f C \n", CPU_TMP, GPU_TMP, MEM_TMP, MOBO_TMP);
+      if(CPU_TMP > 46.00){
+         console_set_colors(CONSOLE_COLOR_BLACK,CONSOLE_COLOR_GREEN);
+         printf("CPU = %4.2f \n", CPU_TMP);
+         printf("GPU = %4.2f C \n", GPU_TMP); 
+         printf("MEM = %4.2f C \n", MEM_TMP); 
+         printf("Mobo = %4.2f C \n", MOBO_TMP);
+         printf("\r");
+
+      }else if (CPU_TMP > 48.20){
+          console_set_colors(CONSOLE_COLOR_BLACK,CONSOLE_COLOR_YELLOW);
+         printf("CPU = %4.2f \n", CPU_TMP);
+         printf("GPU = %4.2f C \n", GPU_TMP); 
+         printf("MEM = %4.2f C \n", MEM_TMP); 
+         printf("Mobo = %4.2f C \n", MOBO_TMP);
+         printf("\r");
+
+      }else if (CPU_TMP > 49.20){
+         console_set_colors(CONSOLE_COLOR_BLACK,CONSOLE_COLOR_ORANGE);
+         printf("CPU = %4.2f \n", CPU_TMP);
+         printf("GPU = %4.2f C \n", GPU_TMP); 
+         printf("MEM = %4.2f C \n", MEM_TMP); 
+         printf("Mobo = %4.2f C \n", MOBO_TMP);
+         printf("\r");
+
+      }else if (CPU_TMP > 50.20){
+         console_set_colors(CONSOLE_COLOR_BLACK,CONSOLE_COLOR_RED);
+         printf("CPU = %4.2f \n", CPU_TMP);
+         printf("GPU = %4.2f C \n", GPU_TMP); 
+         printf("MEM = %4.2f C \n", MEM_TMP); 
+         printf("Mobo = %4.2f C \n", MOBO_TMP);
+         printf("\r");
+
+      }
+      
+      printf("CPU = %4.2f \n", CPU_TMP);
+      printf("GPU = %4.2f C \n", GPU_TMP); 
+      printf("MEM = %4.2f C \n", MEM_TMP); 
+      printf("Mobo = %4.2f C \n", MOBO_TMP);
       printf("\r");
 }
