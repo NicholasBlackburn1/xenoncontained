@@ -63,73 +63,6 @@ void do_asciiart()
 		console_putch(*p++);
 }
 /**
- * Simply Allows me to change Color of Console by Rerunning it 
- */
-
-void reRun(){
-   xenon_make_it_faster(XENON_SPEED_FULL);
-
-   xenos_init(VIDEO_MODE_AUTO);
-   console_init();
-
-   kmem_init();
-   usb_init();
-
-   usb_do_poll();
-
-   do_asciiart();
-
-   printf("\n");
-   printf(" press a to See temp\n");
-   printf("press b to Hear something\n");
-   printf(" press x to close program\n");
-
-   uint8_t buf[16];
-   float CPU_TMP = 0, GPU_TMP = 0, MEM_TMP = 0, MOBO_TMP = 0;
-   struct controller_data_s oldc;
-   while (1)
-   {
-      /* gets the Temp Sensor Data via buffer*/
-      memset(buf, 0, 16);
-      buf[0] = 0x07;
-      
-      xenon_smc_send_message(buf);
-      xenon_smc_receive_response(buf);
-      
-
-      struct controller_data_s c;
- 		if (get_controller_data(&c, 0))
- 		{
- 
- 			if((c.a)&&(!oldc.a))
- 			{
-            getTemp(buf,CPU_TMP,GPU_TMP,MEM_TMP,MOBO_TMP);
-            printf("a pressed\n");
- 			}
- 		
-         else if((c.x)&&(!oldc.x))
- 			{
- 				printf("exiting..");
-            exit(1);
- 			} else if ((c.b)&&(!oldc.b)){
-             
-          } else if ((c.y &&(!oldc.y))){
-             printf("Changing color of screen");
-             console_set_colors(CONSOLE_COLOR_BLACK,CONSOLE_COLOR_PINK);
-             reRun();
-          }
-          
-          
- 			oldc=c;
- 		}
- 		usb_do_poll();
-
-   }
-
-   return 0;
-}
-
-/**
  * Displays Fuse Data From Console ! Waring DO NOT WRITE ANYTHNG TO THIS MEMORY LOCATION!
  * U WILL BRICK CPU
  */
@@ -169,14 +102,15 @@ int main()
    usb_do_poll();
    xenon_sound_init();
 
-   console_set_colors(CONSOLE_COLOR_BLACK,CONSOLE_COLOR_GREEN);
+  
    do_asciiart();
 
    printf("\n");
    printf(" press a to See temp\n");
    printf("press b to Get FUSE DATA!\n");
    printf(" press x to close program\n");
-   printf(" press y to run Somthing!");
+   printf(" press y to run Somthing!\n");
+   printf("press rb to dump dvd and cpu key\n");
 
    uint8_t buf[16];
    float CPU_TMP = 0, GPU_TMP = 0, MEM_TMP = 0, MOBO_TMP = 0;
@@ -199,7 +133,6 @@ int main()
  			{
             printf("Got Temp fof system!\n");
             getTemp(buf,CPU_TMP,GPU_TMP,MEM_TMP,MOBO_TMP);
-            
  			}
  		
          else if((c.x)&&(!oldc.x))
@@ -213,10 +146,10 @@ int main()
           } else if ((c.y) &&(!oldc.y)){
              printf("Changing color of screen");
               console_set_colors(CONSOLE_COLOR_BLACK,CONSOLE_COLOR_RED);
-              reRun();
+              main();
           } else if((c.rb) &&(!oldc.rb)){
              printf("Data From Cpu and DVD KEY Registers!\n");
-             
+             print_cpu_dvd_keys();
           }
           
           
